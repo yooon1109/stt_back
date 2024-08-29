@@ -4,12 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -18,7 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class Record {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private Date recordDate;
+    private int speaker;
 }

@@ -30,6 +30,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-web-services'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+	implementation 'org.json:json:20210307'
+	// Spring WebFlux 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-webflux:3.2.5'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 	annotationProcessor 'org.projectlombok:lombok'

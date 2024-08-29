@@ -8,3 +8,7 @@ spring:
 server:
   servlet:
     context-path: /api
+
+vito:
+  client_id: xdvYmyTbW9uUK9MBAouu
+  client_secret: ObuvZHdGB89w-g4IzMK9x23364CtfSdAttLPvnsR
