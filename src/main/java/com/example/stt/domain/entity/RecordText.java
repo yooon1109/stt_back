@@ -19,4 +19,5 @@ public class RecordText {
     private int startAt;
     private String spk;
     private String msg;
+
 }

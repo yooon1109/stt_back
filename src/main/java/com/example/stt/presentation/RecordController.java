@@ -2,6 +2,7 @@ package com.example.stt.presentation;
 
 import com.example.stt.application.RecordService;
 import com.example.stt.domain.entity.Record;
+import com.example.stt.domain.entity.RecordResponse;
 import com.example.stt.domain.repository.RecordRepository;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 public class RecordController {
@@ -27,8 +30,8 @@ public class RecordController {
     }
 
     @PostMapping(value = "/save/record", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<JSONObject> saveRecord(@RequestPart MultipartFile file) throws Exception {
-        return ResponseEntity.ok(recordService.transcribeFile(file));
+    public ResponseEntity<RecordResponse> saveRecord(@RequestPart MultipartFile file, @RequestParam int spk) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(recordService.transcribeFile(file, spk));
 //        return ResponseEntity.status(HttpStatus.CREATED).body(recordService.transcribeFile(file));
     }
 }

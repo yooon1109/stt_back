@@ -19,4 +19,7 @@ public class Record {
     private String id;
     private Date recordDate;
     private int speaker;
+    private String title;
+
 }
+
