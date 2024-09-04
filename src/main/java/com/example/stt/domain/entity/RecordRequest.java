@@ -2,17 +2,17 @@ package com.example.stt.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class RecordResponse{
-    private String id;
-    private String status;
+public class RecordRequest {
+    private String recordId;
     private String title;
-    private List<RecordText> recordTextList;
     private Integer speaker;
+    private MultipartFile file;
     private List<String> speakers;
+    private List<RecordText> recordTextList;
 }

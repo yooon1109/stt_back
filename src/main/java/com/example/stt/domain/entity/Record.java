@@ -20,6 +20,7 @@ public class Record {
     private Date recordDate;
     private int speaker;
     private String title;
+    private String speakers;
 
 }
 

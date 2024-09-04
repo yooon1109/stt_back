@@ -2,6 +2,7 @@ package com.example.stt.presentation;
 
 import com.example.stt.application.RecordService;
 import com.example.stt.domain.entity.Record;
+import com.example.stt.domain.entity.RecordRequest;
 import com.example.stt.domain.entity.RecordResponse;
 import com.example.stt.domain.repository.RecordRepository;
 import org.json.JSONObject;
@@ -24,14 +25,24 @@ public class RecordController {
     RecordRepository recordRepository;
     @Autowired
     RecordService recordService;
-    @GetMapping("/record")
+
+    @GetMapping("/records")
     public ResponseEntity<List<Record>> getRecord() throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(recordRepository.findAll());
     }
 
-    @PostMapping(value = "/save/record", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<RecordResponse> saveRecord(@RequestPart MultipartFile file, @RequestParam int spk) throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(recordService.transcribeFile(file, spk));
-//        return ResponseEntity.status(HttpStatus.CREATED).body(recordService.transcribeFile(file));
+    @GetMapping("/record/detail")
+    public ResponseEntity<RecordResponse> getRecordDetail(@RequestParam String recordId) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(recordService.recordDetail(recordId));
+    }
+
+    @PostMapping(value = "/save/record", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<RecordResponse> saveRecord(@ModelAttribute RecordRequest recordRequest) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(recordService.transcribeFile(recordRequest));
+    }
+
+    @PostMapping(value = "/edit/record")
+    public ResponseEntity<RecordResponse>  editRecord(@RequestBody RecordRequest recordRequest) throws Exception {
+        return ResponseEntity.status(HttpStatus.OK).body(recordService.editText(recordRequest));
     }
 }
