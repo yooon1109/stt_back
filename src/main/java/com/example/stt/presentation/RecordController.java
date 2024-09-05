@@ -45,4 +45,5 @@ public class RecordController {
     public ResponseEntity<RecordResponse>  editRecord(@RequestBody RecordRequest recordRequest) throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(recordService.editText(recordRequest));
     }
+
 }

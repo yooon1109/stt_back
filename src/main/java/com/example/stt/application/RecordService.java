@@ -28,7 +28,7 @@ public class RecordService {
     public RecordResponse transcribeFile(RecordRequest recordRequest) throws Exception {
 
         // Vito API 호출을 분리하여 처리
-        JSONObject jsonObj = vitoApiService.transcribeFile(recordRequest.getFile(), recordRequest.getSpeakers().size());
+        JSONObject jsonObj = vitoApiService.transcribeFile(recordRequest.getFile(), recordRequest.getSpeaker());
 
         String id = jsonObj.getString("id");
         String status = jsonObj.getString("status");
