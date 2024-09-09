@@ -11,21 +11,27 @@ import okhttp3.WebSocket;
 import okio.ByteString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Sinks;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
 public class StreamingService {
     @Autowired
     private VitoApiService vitoApiService;
     private WebSocket vitoWebSocket;
 
+    private Sinks.Many<String> sink;
+    private AtomicBoolean streaming;
+
     private static final int BUFFER_SIZE = 1024;
 
+
     public void transcribeWebSocket() throws Exception {
-        final AtomicBoolean streaming = new AtomicBoolean(true);  // 스트리밍을 시작할 때 true로 설정
+        streaming = new AtomicBoolean(true);  // 스트리밍을 시작할 때 true로 설정
         OkHttpClient client = new OkHttpClient();
 
         String token = vitoApiService.getAccessToken();
@@ -44,8 +50,9 @@ public class StreamingService {
                 .addHeader("Authorization", "Bearer " + token)
                 .build();
 
-        VitoWebSocketListener webSocketListener = new VitoWebSocketListener();
-        WebSocket webSocket = client.newWebSocket(request, webSocketListener);
+        VitoWebSocketListener vitoWebSocketListener = new VitoWebSocketListener(sink, streaming);
+
+        vitoWebSocket = client.newWebSocket(request, vitoWebSocketListener);
 
         MicrophoneStreamer microphoneStreamer = new MicrophoneStreamer();
 
@@ -55,15 +62,23 @@ public class StreamingService {
             while (streaming.get()) {
                 readBytes = microphoneStreamer.read(buffer);
                 if (readBytes > 0) {
-                    boolean sent = webSocket.send(ByteString.of(buffer, 0, readBytes));
+                    boolean sent = vitoWebSocket.send(ByteString.of(buffer, 0, readBytes));
                     if (!sent) {
                         System.err.println("Send buffer is full. Cannot complete request.");
                     }
                 }
             }
             microphoneStreamer.close();
-            webSocket.send("EOS");
+            vitoWebSocket.send("EOS");
         }).start();
 
+    }
+
+    // WebSocket 종료 메서드
+    public void stopWebSocket() {
+        if (vitoWebSocket != null) {
+            vitoWebSocket.send("EOS");  // WebSocket으로 EOS 신호 전송
+            streaming.set(false);   // 스트리밍 종료
+        }
     }
 }
