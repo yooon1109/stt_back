@@ -52,7 +52,7 @@ public class VitoApiService {
     }
 
     // Transcribe 파일 처리
-    public JSONObject transcribeFile(MultipartFile multipartFile, int spk) throws Exception {
+    public JSONObject transcribeFile(MultipartFile multipartFile, Integer spk) throws Exception {
         accessToken = getAccessToken();
         WebClient webClient = WebClient.builder()
                 .baseUrl("https://openapi.vito.ai/v1")
@@ -66,7 +66,9 @@ public class VitoApiService {
         MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
         multipartBodyBuilder.part("file", new FileSystemResource(file));
 
-        String configJson = String.format("""
+        String configJson;
+        if(spk!=null){
+            configJson = String.format("""
             {
                 "use_diarization": %b,
                 "diarization": {
@@ -75,6 +77,14 @@ public class VitoApiService {
                 "use_disfluency_filter": %b
             }
             """, true, spk, true);
+        }else {
+            configJson = String.format("""
+            {
+                "use_disfluency_filter": %b
+            }
+            """, true);
+        }
+
 
         multipartBodyBuilder.part("config", configJson)
                 .contentType(MediaType.APPLICATION_JSON);

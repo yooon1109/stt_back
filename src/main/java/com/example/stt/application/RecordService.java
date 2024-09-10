@@ -46,7 +46,6 @@ public class RecordService {
         String id = jsonObj.getString("id");
         String status = jsonObj.getString("status");
 
-//        JSONArray utterances = jsonObj.getJSONObject("results").getJSONArray("utterances");
         Map<String, Object> map = jsonObj.toMap();
         RecordResponse recordTextList = saveText(jsonObj, recordRequest);
 
