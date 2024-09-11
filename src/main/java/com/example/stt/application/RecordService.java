@@ -84,7 +84,9 @@ public class RecordService {
             speakersString = String.join(",", recordRequest.getSpeakers());
         }
 
-        Record record = new Record((String) recordId, createdDate, recordRequest.getSpeaker(), recordRequest.getTitle(), speakersString);
+        String recordName = recordRequest.getFile().getOriginalFilename();
+        String recordType = recordRequest.getFile().getContentType();
+        Record record = new Record((String) recordId, createdDate, recordRequest.getSpeaker(), recordRequest.getTitle(), speakersString, recordName, recordType);
         Record responseRecord = recordRepository.save(record);
 
         List<RecordText> recordTextList = new ArrayList<>();
@@ -98,7 +100,7 @@ public class RecordService {
         }
         List<RecordText> responseRecords = recordTextRepository.saveAll(recordTextList);
 
-        return new RecordResponse(responseRecord.getId(), "success", responseRecord.getTitle(), responseRecords, responseRecord.getSpeaker(), recordRequest.getSpeakers());
+        return new RecordResponse(responseRecord.getId(), "success", responseRecord.getTitle(), responseRecords, responseRecord.getSpeaker(), recordRequest.getSpeakers(), null,recordName );
 
     }
 
@@ -127,10 +129,10 @@ public class RecordService {
         List<RecordText> recordTexts = recordTextRepository.findByRecordTextPK_RecordId(  recordRequest.getRecordId());
         recordTextRepository.deleteAll(recordTexts);
         List<RecordText> response = recordTextRepository.saveAll(requestList);
-        return new RecordResponse(recordRequest.getRecordId(), "success", recordRequest.getTitle(), response,null,null);
+        return new RecordResponse(recordRequest.getRecordId(), "success", recordRequest.getTitle(), response,null,null, null, record.getRecordFilename());
     }
 
-    public RecordResponse recordDetail(String recordId){
+    public RecordResponse recordDetail(String recordId) throws IOException {
         Record record = recordRepository.findById(recordId).get();
         List<RecordText> recordTexts = recordTextRepository.findByRecordTextPK_RecordId(recordId);
 
@@ -139,20 +141,14 @@ public class RecordService {
             speakers = Arrays.stream(record.getSpeakers().split(",")).toList();
         }
 
+        // 파일 읽기
+        String fileName = record.getRecordFilename();
 
-        return new RecordResponse(recordId,"success",record.getTitle(), recordTexts,record.getSpeaker(),speakers);
+        Path path = Path.of(filePath + File.separator + fileName);
+        byte[] fileData = Files.readAllBytes(path);
+
+        return new RecordResponse(recordId,"success",record.getTitle(), recordTexts,record.getSpeaker(),speakers,fileData,fileName);
     }
-    private List<RecordText> arrayToList(JSONArray utterances, String recordId) {
-        List<RecordText> recordTextList = new ArrayList<>();
-        for (int i = 0; i < utterances.length(); i++) {
-            JSONObject utteranceObj = utterances.getJSONObject(i);
-            RecordTextPK recordTextPK = new RecordTextPK(i, recordId);
-            RecordText recordText = new RecordText(recordTextPK,
-                    utteranceObj.getInt("start_at"),
-                    utteranceObj.get("spk").toString(),
-                    utteranceObj.getString("msg"));
-            recordTextList.add(recordText);
-        }
-        return recordTextList;
-    }
+
+
 }

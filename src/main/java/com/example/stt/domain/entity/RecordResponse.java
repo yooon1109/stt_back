@@ -15,4 +15,6 @@ public class RecordResponse{
     private List<RecordText> recordTextList;
     private Integer speaker;
     private List<String> speakers;
+    private byte[] fileData;
+    private String recordName;
 }

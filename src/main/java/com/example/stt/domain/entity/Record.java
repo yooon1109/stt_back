@@ -18,6 +18,7 @@ public class Record {
     private Integer speaker;
     private String title;
     private String speakers;
-
+    private String recordFilename;
+    private String recordType;
 }
 
