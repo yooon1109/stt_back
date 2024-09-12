@@ -79,14 +79,17 @@ public class RecordService {
         // Instant를 Date로 변환
         Date createdDate = Date.from(instant);
 
-        String speakersString = null;
-        if(!recordRequest.getSpeakers().isEmpty()){
-            speakersString = String.join(",", recordRequest.getSpeakers());
+        StringBuilder speakersString = new StringBuilder();
+//        if(!recordRequest.getSpeakers().isEmpty()){
+//            speakersString = String.join(",", recordRequest.getSpeakers());
+//        }
+        for(int i=1; i< recordRequest.getSpeaker()+1;i++){
+            speakersString.append(", 참여자").append(i);
         }
 
         String recordName = recordRequest.getFile().getOriginalFilename();
         String recordType = recordRequest.getFile().getContentType();
-        Record record = new Record((String) recordId, createdDate, recordRequest.getSpeaker(), recordRequest.getTitle(), speakersString, recordName, recordType);
+        Record record = new Record((String) recordId, createdDate, recordRequest.getSpeaker(), recordRequest.getTitle(), speakersString.toString(), recordName, recordType);
         Record responseRecord = recordRepository.save(record);
 
         List<RecordText> recordTextList = new ArrayList<>();
