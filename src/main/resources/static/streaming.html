@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STT Streaming</title>
+    <script>
+        let mediaRecorder;
+        let recordedChunks = [];
+
+
+        function startStreaming() {
+            const eventSource = new EventSource("http://localhost:8081/api/stream");
+
+            eventSource.onmessage = function(event) {
+                const newElement = document.createElement("div");
+                newElement.innerText = event.data;
+                document.getElementById("messages").appendChild(newElement);
+            };
+
+            eventSource.onerror = function() {
+                eventSource.close();
+                alert('Connection closed');
+            };
+        }
+        function startRecording() {
+            navigator.mediaDevices.getDisplayMedia({ audio: true, video: true }).then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.start();
+            }).catch(error => {
+                console.error('Error accessing media devices.', error);
+            });
+        }
+
+        // 멈춤 버튼 클릭 시 호출
+        function stopRecording() {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+
+            // 서버에 Stop 신호 전송
+            fetch("http://localhost:8081/api/stop", {
+                method: "POST"
+            }).then(response => {
+                console.log("Recording stopped on server");
+            }).catch(error => {
+                console.error('Error stopping recording:', error);
+            });
+
+            mediaRecorder.onstop = () => {
+                // 녹음이 완전히 종료된 후 Blob 생성
+                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const audioURL = window.URL.createObjectURL(blob);
+
+                // 오디오 태그에 녹음된 파일을 연결
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = audioURL;
+                document.getElementById("audio-player").appendChild(audio);
+            };
+        }
+        // 클릭 시 두 함수 모두 호출
+        function startBoth() {
+            startStreaming();
+            startRecording();
+        }
+    </script>
+</head>
+<body>
+<h1>STT Stream</h1>
+<div id="messages"></div>
+<button onclick="startBoth()">Start Streaming</button>
+<button onclick="stopRecording()">Stop Streaming</button>
+<div id="audio-player"></div> <!-- 녹음된 파일 재생 위치 -->
+</body>
+</html>

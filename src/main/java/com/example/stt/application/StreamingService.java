@@ -23,7 +23,7 @@ public class StreamingService {
     @Autowired
     private VitoApiService vitoApiService;
     private WebSocket vitoWebSocket;
-
+    @Autowired
     private Sinks.Many<String> sink;
     private AtomicBoolean streaming;
 

@@ -15,7 +15,7 @@ import reactor.core.publisher.Sinks;
 public class StreamController {
 
     @Autowired
-    private final Sinks.Many<String> sink;
+    private Sinks.Many<String> sink;
 
     @Autowired
     private StreamingService streamingService;

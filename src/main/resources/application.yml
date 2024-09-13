@@ -14,10 +14,11 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: jdbc:mariadb://localhost:3306/stt
-    username: user
-    password: qlalfqjsgh
+    url: jdbc:mariadb://localhost:3306/okr_stt
+    username: root
+    password: 1109
     driver-class-name: org.mariadb.jdbc.Driver
+
 
 server:
   port: 8081
