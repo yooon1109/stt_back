@@ -79,7 +79,7 @@ public class RecordService {
         // Instant를 Date로 변환
         Date createdDate = Date.from(instant);
 
-        StringBuilder speakersString = new StringBuilder();
+        StringBuilder speakersString = new StringBuilder("참여자1");
 //        if(!recordRequest.getSpeakers().isEmpty()){
 //            speakersString = String.join(",", recordRequest.getSpeakers());
 //        }
