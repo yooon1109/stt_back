@@ -1,6 +1,7 @@
 package com.example.stt.application;
 
 import com.example.stt.infrastructure.audio.MicrophoneStreamer;
+import com.example.stt.infrastructure.persistence.VitoApiService;
 import com.example.stt.infrastructure.persistence.VitoWebSocketListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,6 @@ import okhttp3.Request;
 import okhttp3.WebSocket;
 import okio.ByteString;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Sinks;
 
@@ -38,7 +38,7 @@ public class StreamingService {
 
         HttpUrl.Builder httpBuilder = HttpUrl.get("https://openapi.vito.ai/v1/transcribe:streaming").newBuilder();
         httpBuilder.addQueryParameter("sample_rate", "8000");
-        httpBuilder.addQueryParameter("encoding", "LINEAR16");
+        httpBuilder.addQueryParameter("encoding", "WAV");
         httpBuilder.addQueryParameter("use_itn", "true");
         httpBuilder.addQueryParameter("use_disfluency_filter", "true");
         httpBuilder.addQueryParameter("use_profanity_filter", "false");
@@ -81,4 +81,6 @@ public class StreamingService {
             streaming.set(false);   // 스트리밍 종료
         }
     }
+
+
 }

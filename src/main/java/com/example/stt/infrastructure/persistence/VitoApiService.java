@@ -1,4 +1,4 @@
-package com.example.stt.application;
+package com.example.stt.infrastructure.persistence;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
