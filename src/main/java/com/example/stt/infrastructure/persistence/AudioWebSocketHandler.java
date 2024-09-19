@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
+import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import reactor.core.publisher.Sinks;
 
@@ -20,10 +21,12 @@ import org.springframework.http.HttpHeaders;
 import javax.sound.sampled.*;
 import java.io.*;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 @Component
 @RequiredArgsConstructor
-public class AudioWebSocketHandler extends TextWebSocketHandler {
+public class AudioWebSocketHandler extends BinaryWebSocketHandler {
     @Autowired
     private VitoApiService vitoApiService;
     private WebSocket vitoWebSocket;
@@ -64,14 +67,10 @@ public class AudioWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
-        byte[] payload = message.getPayload().array();
-
-        // 데이터를 처리하는 로직
-        try {
-            processAudioData(payload);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        ByteBuffer payloadBuffer = message.getPayload();
+        byte[] payload = new byte[payloadBuffer.remaining()];
+        payloadBuffer.get(payload);  // ByteBuffer에서 byte[]로 읽어오기
+        System.out.println(Arrays.toString(payload));
     }
 
     private void processAudioData(byte[] data) throws IOException {
@@ -104,28 +103,28 @@ public class AudioWebSocketHandler extends TextWebSocketHandler {
 
         System.out.println("WebSocket connection established");
 
-        streaming = new AtomicBoolean(true);  // 스트리밍을 시작할 때 true로 설정
-        OkHttpClient client = new OkHttpClient();
-
-        String token = vitoApiService.getAccessToken();
-
-        HttpUrl.Builder httpBuilder = HttpUrl.get("https://openapi.vito.ai/v1/transcribe:streaming").newBuilder();
-        httpBuilder.addQueryParameter("sample_rate", "8000");
-        httpBuilder.addQueryParameter("encoding", "LINEAR16");
-        httpBuilder.addQueryParameter("use_itn", "true");
-        httpBuilder.addQueryParameter("use_disfluency_filter", "true");
-        httpBuilder.addQueryParameter("use_profanity_filter", "false");
-
-        String url = httpBuilder.toString().replace("https://", "wss://");
-
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Bearer " + token)
-                .build();
-
-        VitoWebSocketListener vitoWebSocketListener = new VitoWebSocketListener(sink, streaming);
-
-        vitoWebSocket = client.newWebSocket(request, vitoWebSocketListener);
+//        streaming = new AtomicBoolean(true);  // 스트리밍을 시작할 때 true로 설정
+//        OkHttpClient client = new OkHttpClient();
+//
+//        String token = vitoApiService.getAccessToken();
+//
+//        HttpUrl.Builder httpBuilder = HttpUrl.get("https://openapi.vito.ai/v1/transcribe:streaming").newBuilder();
+//        httpBuilder.addQueryParameter("sample_rate", "8000");
+//        httpBuilder.addQueryParameter("encoding", "LINEAR16");
+//        httpBuilder.addQueryParameter("use_itn", "true");
+//        httpBuilder.addQueryParameter("use_disfluency_filter", "true");
+//        httpBuilder.addQueryParameter("use_profanity_filter", "false");
+//
+//        String url = httpBuilder.toString().replace("https://", "wss://");
+//
+//        Request request = new Request.Builder()
+//                .url(url)
+//                .addHeader("Authorization", "Bearer " + token)
+//                .build();
+//
+//        VitoWebSocketListener vitoWebSocketListener = new VitoWebSocketListener(sink, streaming);
+//
+//        vitoWebSocket = client.newWebSocket(request, vitoWebSocketListener);
 
     }
 

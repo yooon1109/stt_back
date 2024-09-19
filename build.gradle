@@ -31,7 +31,6 @@ dependencies {
 	implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 	implementation 'org.springframework.boot:spring-boot-starter-web-services'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.json:json:20210307'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	// Spring WebFlux 의존성

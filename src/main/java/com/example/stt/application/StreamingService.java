@@ -11,9 +11,18 @@ import okhttp3.Request;
 import okhttp3.WebSocket;
 import okio.ByteString;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Sinks;
 
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -26,9 +35,21 @@ public class StreamingService {
     @Autowired
     private Sinks.Many<String> sink;
     private AtomicBoolean streaming;
+    private static final int SAMPLE_RATE = 44100; // 샘플링 레이트
+    private static final int BITS_PER_SAMPLE = 16; // 비트 깊이
+    private static final int BUFFER_SIZE = 4096;  // 버퍼 크기 설정
 
-    private static final int BUFFER_SIZE = 1024;
+    private final AudioFormat format = new AudioFormat(
+            AudioFormat.Encoding.PCM_SIGNED,
+            SAMPLE_RATE,
+            BITS_PER_SAMPLE,
+            1,
+            1 * (BITS_PER_SAMPLE / 8),
+            SAMPLE_RATE,
+            false);
 
+    @Value("${file.path}")
+    private String filePath;
 
     public void transcribeWebSocket() throws Exception {
         streaming = new AtomicBoolean(true);  // 스트리밍을 시작할 때 true로 설정
@@ -38,7 +59,7 @@ public class StreamingService {
 
         HttpUrl.Builder httpBuilder = HttpUrl.get("https://openapi.vito.ai/v1/transcribe:streaming").newBuilder();
         httpBuilder.addQueryParameter("sample_rate", "8000");
-        httpBuilder.addQueryParameter("encoding", "WAV");
+        httpBuilder.addQueryParameter("encoding", "LINEAR16");
         httpBuilder.addQueryParameter("use_itn", "true");
         httpBuilder.addQueryParameter("use_disfluency_filter", "true");
         httpBuilder.addQueryParameter("use_profanity_filter", "false");
@@ -55,6 +76,8 @@ public class StreamingService {
         vitoWebSocket = client.newWebSocket(request, vitoWebSocketListener);
 
         MicrophoneStreamer microphoneStreamer = new MicrophoneStreamer();
+        // ByteArrayOutputStream을 사용하여 데이터를 파일로 저장
+        ByteArrayOutputStream audioOutputStream = new ByteArrayOutputStream();
 
         new Thread(() -> {
             byte[] buffer = new byte[BUFFER_SIZE];
@@ -66,10 +89,20 @@ public class StreamingService {
                     if (!sent) {
                         System.err.println("Send buffer is full. Cannot complete request.");
                     }
+                    audioOutputStream.write(buffer, 0, readBytes);
                 }
+
             }
             microphoneStreamer.close();
             vitoWebSocket.send("EOS");
+            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(audioOutputStream.toByteArray())) {
+                AudioInputStream audioStream = new AudioInputStream(byteArrayInputStream, format, audioOutputStream.size() / format.getFrameSize());
+                File file = new File(filePath + File.separator + "output.wav");
+                AudioSystem.write(audioStream, AudioFileFormat.Type.WAVE, file);
+                System.out.println("Recording saved to file: " + file.getAbsolutePath());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }).start();
 
     }

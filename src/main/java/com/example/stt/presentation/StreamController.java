@@ -1,7 +1,6 @@
 package com.example.stt.presentation;
 
 import com.example.stt.application.StreamingService;
-import com.example.stt.infrastructure.persistence.AudioWebSocketHandler;
 import com.example.stt.infrastructure.persistence.VitoApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +27,6 @@ public class StreamController {
     @Autowired
     private VitoApiService vitoApiService;
 
-
-    private AudioWebSocketHandler audioWebSocketHandler;
-
-    @GetMapping("/download-audio")
-    public ResponseEntity<InputStreamResource> downloadAudioFile() throws IOException {
-        return audioWebSocketHandler.getAudioFile();
-    }
 
     @GetMapping(value = "/stream")
     public Flux<String> streamEvents() throws Exception{
