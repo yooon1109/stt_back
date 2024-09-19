@@ -95,14 +95,14 @@ public class StreamingService {
             }
             microphoneStreamer.close();
             vitoWebSocket.send("EOS");
-            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(audioOutputStream.toByteArray())) {
-                AudioInputStream audioStream = new AudioInputStream(byteArrayInputStream, format, audioOutputStream.size() / format.getFrameSize());
-                File file = new File(filePath + File.separator + "output.wav");
-                AudioSystem.write(audioStream, AudioFileFormat.Type.WAVE, file);
-                System.out.println("Recording saved to file: " + file.getAbsolutePath());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+//            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(audioOutputStream.toByteArray())) {
+//                AudioInputStream audioStream = new AudioInputStream(byteArrayInputStream, format, audioOutputStream.size() / format.getFrameSize());
+//                File file = new File(filePath  + "\\output.wav");
+//                AudioSystem.write(audioStream, AudioFileFormat.Type.WAVE, file);
+//                System.out.println("Recording saved to file: " + file.getAbsolutePath());
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
         }).start();
 
     }
