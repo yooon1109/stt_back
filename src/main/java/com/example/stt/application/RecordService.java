@@ -79,29 +79,35 @@ public class RecordService {
         // Instant를 Date로 변환
         Date createdDate = Date.from(instant);
 
-        StringBuilder speakersString = new StringBuilder("참여자1");
-//        if(!recordRequest.getSpeakers().isEmpty()){
-//            speakersString = String.join(",", recordRequest.getSpeakers());
-//        }
-        for(int i=1; i< recordRequest.getSpeaker()+1;i++){
-            speakersString.append(", 참여자").append(i);
-        }
 
-        String recordName = recordRequest.getFile().getOriginalFilename();
-        String recordType = recordRequest.getFile().getContentType();
-        Record record = new Record((String) recordId, createdDate, recordRequest.getSpeaker(), recordRequest.getTitle(), speakersString.toString(), recordName, recordType);
-        Record responseRecord = recordRepository.save(record);
 
+        int totalSpk = 0;
         List<RecordText> recordTextList = new ArrayList<>();
         for(int i=0; i<results.length();i++){
             JSONObject jsonObj = results.getJSONObject(i);
-
+            if((Integer) jsonObj.get("spk")>totalSpk){
+                totalSpk= (Integer) jsonObj.get("spk");
+            }
             log.info(jsonObj.toString());
             RecordTextPK recordTextPK = new RecordTextPK(i, (String) recordId);
             RecordText recordText = new RecordText(recordTextPK, (Integer) jsonObj.get("start_at"),jsonObj.get("spk").toString(),jsonObj.get("msg").toString());
             recordTextList.add(recordText);
         }
+        totalSpk++;
         List<RecordText> responseRecords = recordTextRepository.saveAll(recordTextList);
+
+        StringBuilder speakersString = new StringBuilder("참여자1");
+//        if(!recordRequest.getSpeakers().isEmpty()){
+//            speakersString = String.join(",", recordRequest.getSpeakers());
+//        }
+        for(int i=2; i< totalSpk+1;i++){
+            speakersString.append(", 참여자").append(i);
+        }
+
+        String recordName = recordRequest.getFile().getOriginalFilename();
+        String recordType = recordRequest.getFile().getContentType();
+        Record record = new Record((String) recordId, createdDate, totalSpk , recordRequest.getTitle(), speakersString.toString(), recordName, recordType);
+        Record responseRecord = recordRepository.save(record);
 
         return new RecordResponse(responseRecord.getId(), "success", responseRecord.getTitle(), responseRecords, responseRecord.getSpeaker(), recordRequest.getSpeakers(), null,recordName );
 
