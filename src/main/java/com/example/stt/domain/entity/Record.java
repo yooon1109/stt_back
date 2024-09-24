@@ -20,5 +20,6 @@ public class Record {
     private String speakers;
     private String recordFilename;
     private String recordType;
+    private Double duration;
 }
 

@@ -17,4 +17,6 @@ public class RecordResponse{
     private List<String> speakers;
     private byte[] fileData;
     private String recordName;
+    private String recordType;
+    private Double duration;
 }

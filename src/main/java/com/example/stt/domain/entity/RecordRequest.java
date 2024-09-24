@@ -23,4 +23,5 @@ public class RecordRequest {
     private List<String> speakers;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<RecordText> recordTextList;
+    private Double duration;
 }

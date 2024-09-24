@@ -37,7 +37,7 @@ public class RecordService {
     @Value("${file.path}")
     private String filePath;
 
-    public RecordResponse transcribeFile(RecordRequest recordRequest) throws Exception {
+    public JSONObject transcribeFile(RecordRequest recordRequest) throws Exception {
         // 파일을 특정 경로에 저장
         saveFile(recordRequest.getFile(), filePath);
         // Vito API 호출을 분리하여 처리
@@ -47,9 +47,9 @@ public class RecordService {
         String status = jsonObj.getString("status");
 
         Map<String, Object> map = jsonObj.toMap();
-        RecordResponse recordTextList = saveText(jsonObj, recordRequest);
 
-        return recordTextList;
+
+        return saveText(jsonObj, recordRequest);
     }
 
     private void saveFile(MultipartFile file, String path) throws IOException {
@@ -69,7 +69,7 @@ public class RecordService {
         }
     }
 
-    public RecordResponse saveText(JSONObject jsonObject, RecordRequest recordRequest){
+    public JSONObject saveText(JSONObject jsonObject, RecordRequest recordRequest){
         Object recordId = jsonObject.get("id");
         JSONArray results = jsonObject.getJSONObject("results").getJSONArray("utterances");
         //저장
@@ -106,14 +106,14 @@ public class RecordService {
 
         String recordName = recordRequest.getFile().getOriginalFilename();
         String recordType = recordRequest.getFile().getContentType();
-        Record record = new Record((String) recordId, createdDate, totalSpk , recordRequest.getTitle(), speakersString.toString(), recordName, recordType);
+        Record record = new Record((String) recordId, createdDate, totalSpk , recordRequest.getTitle(), speakersString.toString(), recordName, recordType, recordRequest.getDuration());
         Record responseRecord = recordRepository.save(record);
 
-        return new RecordResponse(responseRecord.getId(), "success", responseRecord.getTitle(), responseRecords, responseRecord.getSpeaker(), recordRequest.getSpeakers(), null,recordName );
+        return new JSONObject("id", responseRecord.getId());
 
     }
 
-    public RecordResponse editText(RecordRequest recordRequest){
+    public String editText(RecordRequest recordRequest){
         Record record = recordRepository.findById(recordRequest.getRecordId()).get();
         if(recordRequest.getSpeaker()!=null){
             record.setSpeaker(recordRequest.getSpeaker());
@@ -138,7 +138,7 @@ public class RecordService {
         List<RecordText> recordTexts = recordTextRepository.findByRecordTextPK_RecordId(  recordRequest.getRecordId());
         recordTextRepository.deleteAll(recordTexts);
         List<RecordText> response = recordTextRepository.saveAll(requestList);
-        return new RecordResponse(recordRequest.getRecordId(), "success", recordRequest.getTitle(), response,null,null, null, record.getRecordFilename());
+        return "success";
     }
 
     public RecordResponse recordDetail(String recordId) throws IOException {
@@ -156,7 +156,7 @@ public class RecordService {
         Path path = Path.of(filePath + File.separator + fileName);
         byte[] fileData = Files.readAllBytes(path);
 
-        return new RecordResponse(recordId,"success",record.getTitle(), recordTexts,record.getSpeaker(),speakers,fileData,fileName);
+        return new RecordResponse(recordId,"success",record.getTitle(), recordTexts,record.getSpeaker(),speakers,fileData,fileName,record.getRecordType(), record.getDuration());
     }
 
 
