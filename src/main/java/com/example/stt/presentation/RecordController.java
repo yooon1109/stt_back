@@ -35,7 +35,7 @@ public class RecordController {
     }
 
     @PostMapping(value = "/save/record", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<JSONObject> saveRecord(@Valid @ModelAttribute RecordRequest recordRequest) throws Exception {
+    public ResponseEntity<RecordResponse> saveRecord(@Valid @ModelAttribute RecordRequest recordRequest) throws Exception {
         if (recordRequest.getRecordTextList() == null) {
             // recordTextList가 null일 경우 처리 로직
             recordRequest.setRecordTextList(Collections.emptyList()); // 기본값을 빈 리스트로 설정할 수도 있음

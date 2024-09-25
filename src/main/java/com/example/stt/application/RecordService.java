@@ -37,7 +37,7 @@ public class RecordService {
     @Value("${file.path}")
     private String filePath;
 
-    public JSONObject transcribeFile(RecordRequest recordRequest) throws Exception {
+    public RecordResponse transcribeFile(RecordRequest recordRequest) throws Exception {
         // 파일을 특정 경로에 저장
         saveFile(recordRequest.getFile(), filePath);
         // Vito API 호출을 분리하여 처리
@@ -69,7 +69,7 @@ public class RecordService {
         }
     }
 
-    public JSONObject saveText(JSONObject jsonObject, RecordRequest recordRequest){
+    public RecordResponse saveText(JSONObject jsonObject, RecordRequest recordRequest){
         Object recordId = jsonObject.get("id");
         JSONArray results = jsonObject.getJSONObject("results").getJSONArray("utterances");
         //저장
@@ -109,7 +109,7 @@ public class RecordService {
         Record record = new Record((String) recordId, createdDate, totalSpk , recordRequest.getTitle(), speakersString.toString(), recordName, recordType, recordRequest.getDuration());
         Record responseRecord = recordRepository.save(record);
 
-        return new JSONObject("id", responseRecord.getId());
+        return new RecordResponse(responseRecord.getId(),null,null,null,null,null,null,null,null,null);
 
     }
 
