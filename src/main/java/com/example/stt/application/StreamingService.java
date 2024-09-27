@@ -1,8 +1,8 @@
 package com.example.stt.application;
 
 import com.example.stt.infrastructure.audio.MicrophoneStreamer;
-import com.example.stt.infrastructure.persistence.VitoApiService;
-import com.example.stt.infrastructure.persistence.VitoWebSocketListener;
+import com.example.stt.infrastructure.VitoApiService;
+import com.example.stt.infrastructure.websocket.VitoWebSocketListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
@@ -15,20 +15,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Sinks;
 
-import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class StreamingService {
+
     @Autowired
     private VitoApiService vitoApiService;
     private WebSocket vitoWebSocket;
@@ -39,15 +34,6 @@ public class StreamingService {
     private static final int BITS_PER_SAMPLE = 16; // 비트 깊이
     private static final int BUFFER_SIZE = 4096;  // 버퍼 크기 설정
 
-    private final AudioFormat format = new AudioFormat(
-            AudioFormat.Encoding.PCM_SIGNED,
-            SAMPLE_RATE,
-            BITS_PER_SAMPLE,
-            1,
-            1 * (BITS_PER_SAMPLE / 8),
-            SAMPLE_RATE,
-            false);
-
     @Value("${file.path}")
     private String filePath;
 
@@ -57,7 +43,8 @@ public class StreamingService {
 
         String token = vitoApiService.getAccessToken();
 
-        HttpUrl.Builder httpBuilder = HttpUrl.get("https://openapi.vito.ai/v1/transcribe:streaming").newBuilder();
+        HttpUrl.Builder httpBuilder = HttpUrl.get("https://openapi.vito.ai/v1/transcribe:streaming")
+            .newBuilder();
         httpBuilder.addQueryParameter("sample_rate", "8000");
         httpBuilder.addQueryParameter("encoding", "LINEAR16");
         httpBuilder.addQueryParameter("use_itn", "true");
@@ -67,9 +54,9 @@ public class StreamingService {
         String url = httpBuilder.toString().replace("https://", "wss://");
 
         Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Authorization", "Bearer " + token)
-                .build();
+            .url(url)
+            .addHeader("Authorization", "Bearer " + token)
+            .build();
 
         VitoWebSocketListener vitoWebSocketListener = new VitoWebSocketListener(sink, streaming);
 
@@ -95,14 +82,6 @@ public class StreamingService {
             }
             microphoneStreamer.close();
             vitoWebSocket.send("EOS");
-//            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(audioOutputStream.toByteArray())) {
-//                AudioInputStream audioStream = new AudioInputStream(byteArrayInputStream, format, audioOutputStream.size() / format.getFrameSize());
-//                File file = new File(filePath  + "\\output.wav");
-//                AudioSystem.write(audioStream, AudioFileFormat.Type.WAVE, file);
-//                System.out.println("Recording saved to file: " + file.getAbsolutePath());
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
         }).start();
 
     }
